@@ -309,6 +309,7 @@ class StorageManager {
           [dateString, menuEntry.value, menuEntry.key.id]);
     }
     await batch.commit();
+    _todaysMenus.clear();
   }
 
   String converToDateString(DateTime date) {
@@ -328,6 +329,13 @@ class StorageManager {
       });
     }
     await batch.commit();
+  }
+
+  @deprecated
+  Future<void> printDayEntries() async {
+    print(await _db!.query(
+      'DayEntry',
+    ));
   }
 
   @deprecated

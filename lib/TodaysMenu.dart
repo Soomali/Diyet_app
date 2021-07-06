@@ -3,6 +3,7 @@ import 'package:diyet_app/MenuDisplayItem.dart';
 import 'package:diyet_app/Searchbar.dart';
 import 'package:diyet_app/storageManager.dart';
 import 'package:flutter/material.dart';
+import 'FuturePage.dart';
 
 class TodaysMenuAddPage extends StatelessWidget {
   const TodaysMenuAddPage({Key? key}) : super(key: key);
@@ -64,7 +65,10 @@ class _BottomBarState extends State<BottomBar> {
           ),
           TextButton(
               onPressed: () {
-                print('ok');
+                Navigator.of(context)
+                    .push(FuturePopUp<void>(
+                        future: StorageManager().insertDayEntry()))
+                    .then((value) => Navigator.of(context).pop());
               },
               child: Text(
                 'Bugün \nyediklerime ekle',

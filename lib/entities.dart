@@ -142,6 +142,10 @@ class MenuList extends _MapHolder<Menu> {
     return MenuList(menus: {});
   }
 
+  void clear() {
+    _map.clear();
+  }
+
   int get menuCount => sum(_map.values);
 
   double get sumCalories {

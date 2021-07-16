@@ -14,8 +14,8 @@ class AppBarWithNoSearch extends StatelessWidget {
             Scaffold.of(context).openDrawer();
           },
           icon: Icon(
-            Icons.workspaces_outline,
-            size: 16,
+            Icons.menu,
+            size: 24,
           )),
     );
   }
@@ -42,8 +42,8 @@ class _SearchAreaState extends State<SearchArea> {
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
-            icon: Icon(Icons.workspaces_outline),
-            iconSize: 16,
+            icon: Icon(Icons.menu),
+            iconSize: 24,
           ),
           Expanded(
             child: Padding(

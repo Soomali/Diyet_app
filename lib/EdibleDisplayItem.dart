@@ -36,24 +36,6 @@ class _EdibleItemSearchState extends State<EdibleItemSearch> {
   @override
   Widget build(BuildContext context) {
     return EdibleItemList();
-    //  FutureBuilder(
-    //     future: widget.manager.initialize(),
-    //     builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-    //       switch (snapshot.connectionState) {
-    //         case ConnectionState.none:
-    //           return Text("Veritabanı bekleniyor...");
-
-    //         case ConnectionState.waiting:
-    //           return Text("Veritabanı bekleniyor...");
-    //         case ConnectionState.active:
-    //           return CircularProgressIndicator();
-    //         case ConnectionState.done:
-    //           if (snapshot.hasData && snapshot.data!) {
-    //             return EdibleItemList();
-    //           }
-    //           return Text('Hata oluştu, malişkoya bildir....');
-    //       }
-    //     });
   }
 }
 

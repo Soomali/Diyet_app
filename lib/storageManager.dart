@@ -276,7 +276,7 @@ class StorageManager {
       menusMap[id] = map['quantity'];
     }
     var menusQuery = await _db!
-        .rawQuery('SELECT * FROM Menus WHERE id IN ?', menusMap.keys.toList());
+        .rawQuery('SELECT * FROM Menu WHERE id IN (?)', menusMap.keys.toList());
     List<Menu> menus = await this.createMenus(menusQuery);
 
     return menusMap.map<Menu, int>((key, value) =>

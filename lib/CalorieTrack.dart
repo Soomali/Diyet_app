@@ -19,11 +19,7 @@ class CalorieTrackingPage extends StatelessWidget {
         drawer: CustomDrawer(),
         body: Column(children: [
           AppBarWithNoSearch(),
-          Expanded(
-            child: ListView(
-              children: [TodaysCalories()],
-            ),
-          )
+          Expanded(child: ExpandableDayList())
         ]),
       ),
     );
@@ -114,9 +110,32 @@ class TodaysCalories extends StatelessWidget {
                   ),
                 );
               }
-              return CircularProgressIndicator(
-                value: 0,
-                backgroundColor: Colors.blueGrey,
+              return Container(
+                width: 300,
+                height: 300,
+                margin: EdgeInsets.only(top: 20),
+                child: FittedBox(
+                  child: Stack(
+                    children: [
+                      CircularProgressIndicator(
+                        value: 0,
+                        backgroundColor: Colors.grey,
+                        strokeWidth: 2,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical:
+                                MediaQuery.of(context).size.height * 0.0158,
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.028),
+                        child: Text(
+                          '0.0',
+                          style: TextStyle(color: Colors.blue, fontSize: 8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
           }
         });
@@ -171,48 +190,48 @@ class _ExpandableDayListState extends State<ExpandableDayList> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: PagedListView(
+    return PagedListView(
       pagingController: this.controller,
       builderDelegate: PagedChildBuilderDelegate<MenuList>(
-          itemBuilder: (context, menulist, index) =>
-              ExpansionTile(title: Text(menulist.date.toString()))),
-    ));
-  }
-}
-
-class DayCalorieWidget extends StatelessWidget {
-  final MenuList dayList;
-  const DayCalorieWidget({Key? key, required this.dayList}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var calorieNeed = PreferencesManager().userCalorieNeed;
-
-    var indicator = _getProgressIndicator(dayList.sumCalories, calorieNeed);
-    return Container(
-      width: 300,
-      height: 300,
-      margin: EdgeInsets.only(top: 20),
-      child: FittedBox(
-        child: Stack(
-          children: [
-            indicator,
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: MediaQuery.of(context).size.height * 0.0158,
-                  horizontal: MediaQuery.of(context).size.width *
-                      (0.018 +
-                          0.005 *
-                              (dayList.sumCalories.toStringAsFixed(1).length -
-                                  1))),
-              child: Text(
-                dayList.sumCalories.toString(),
-                style: TextStyle(color: Colors.blue, fontSize: 8),
+        itemBuilder: (context, menulist, index) => index == 0
+            ? TodaysCalories()
+            : ExpansionTile(
+                title: Text(
+                  menulist.date.toString(),
+                  style: TextStyle(color: Colors.blue),
+                ),
+                children: [
+                  Container(
+                    width: 300,
+                    height: 300,
+                    margin: EdgeInsets.only(top: 20),
+                    child: FittedBox(
+                      child: Stack(
+                        children: [
+                          _getProgressIndicator(menulist.sumCalories,
+                              PreferencesManager().userCalorieNeed),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical:
+                                    MediaQuery.of(context).size.height * 0.0158,
+                                horizontal: MediaQuery.of(context).size.width *
+                                    (0.018 +
+                                        0.005 *
+                                            (menulist.sumCalories
+                                                    .toStringAsFixed(1)
+                                                    .length -
+                                                1))),
+                            child: Text(
+                              menulist.sumCalories.toString(),
+                              style: TextStyle(color: Colors.blue, fontSize: 8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

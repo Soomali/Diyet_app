@@ -265,10 +265,11 @@ class StorageManager {
     notifyListeners();
   }
 
-  Future<Map<Menu, int>> getDayMenus({String? timeString}) async {
-    timeString ??= converToDateString(DateTime.now());
+  Future<MenuList> getDayMenus({DateTime? date}) async {
+    date ??= DateTime.now();
+    String dateString = converToDateString(date);
     var dayEntries = await _db!
-        .query('DayEntry', where: 'date = ?', whereArgs: [timeString]);
+        .query('DayEntry', where: 'date = ?', whereArgs: [dateString]);
     Map<int, int> menusMap = {};
 
     for (Map map in dayEntries) {
@@ -279,19 +280,19 @@ class StorageManager {
         .rawQuery('SELECT * FROM Menu WHERE id IN (?)', menusMap.keys.toList());
     List<Menu> menus = await this.createMenus(menusQuery);
 
-    return menusMap.map<Menu, int>((key, value) =>
-        MapEntry(menus.firstWhere((element) => element.id == key), value));
+    return MenuList(
+        menus: menusMap.map<Menu, int>((key, value) =>
+            MapEntry(menus.firstWhere((element) => element.id == key), value)),
+        date: date);
   }
 
-  Future<List<Map<Menu, int>>> getHistoricDayMenus(
+  Future<List<MenuList>> getHistoricDayMenus(
       {int limit = 30, DateTime? startDate}) async {
     startDate ??= DateTime.now().subtract(Duration(days: 1));
-    List<Map<Menu, int>> dayData = [];
+    List<MenuList> dayData = [];
     for (int i = 0; i < limit; i++) {
-      Map<Menu, int> menusDate =
-          await getDayMenus(timeString: converToDateString(startDate!));
-      startDate = startDate.subtract(Duration(days: 1));
-      dayData.add(menusDate);
+      dayData.add(await getDayMenus(date: startDate));
+      startDate = startDate!.subtract(Duration(days: 1));
     }
     return dayData;
   }

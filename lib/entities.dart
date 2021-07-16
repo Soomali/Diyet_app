@@ -138,8 +138,9 @@ class Menu extends _MapHolder<Edible> {
 }
 
 class MenuList extends _MapHolder<Menu> {
+  DateTime date;
   static MenuList get empty {
-    return MenuList(menus: {});
+    return MenuList(menus: {}, date: DateTime.now());
   }
 
   void clear() {
@@ -157,7 +158,7 @@ class MenuList extends _MapHolder<Menu> {
     return sum;
   }
 
-  MenuList({required Map<Menu, int> menus}) : super(menus);
+  MenuList({required Map<Menu, int> menus, required this.date}) : super(menus);
 
   int? operator [](Menu key) {
     return _map[_map.keys.firstWhere((element) => element.id == key.id,

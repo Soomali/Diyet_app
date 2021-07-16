@@ -2,6 +2,7 @@ import 'package:diyet_app/CalorieINeed.dart';
 import 'package:diyet_app/MenuDisplayItem.dart';
 import 'EdibleDisplayItem.dart';
 import 'package:flutter/material.dart';
+import 'CalorieTrack.dart';
 
 const TextStyle _style = TextStyle(fontSize: 20, color: Colors.blue);
 
@@ -36,7 +37,7 @@ class CustomDrawer extends StatelessWidget {
           ),
           DrawerItem(
             child: CustomListTile(
-                onTap: () => print('ToTodaaay!'),
+                onTap: () => toPage(CalorieTrackingPage(), context),
                 text: 'Günlük Kalori',
                 icon: Icons.show_chart),
           ),

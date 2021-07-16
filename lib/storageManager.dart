@@ -265,13 +265,13 @@ class StorageManager {
     notifyListeners();
   }
 
-  Future<MenuList> getDayMenus({DateTime? date}) async {
+  Future<MenuList?> getDayMenus({DateTime? date}) async {
     date ??= DateTime.now();
     String dateString = converToDateString(date);
     var dayEntries = await _db!
         .query('DayEntry', where: 'date = ?', whereArgs: [dateString]);
     Map<int, int> menusMap = {};
-
+    if (dayEntries.isEmpty) return null;
     for (Map map in dayEntries) {
       var id = map['MenuID'];
       menusMap[id] = map['quantity'];
@@ -291,7 +291,8 @@ class StorageManager {
     startDate ??= DateTime.now().subtract(Duration(days: 1));
     List<MenuList> dayData = [];
     for (int i = 0; i < limit; i++) {
-      dayData.add(await getDayMenus(date: startDate));
+      MenuList? list = await getDayMenus(date: startDate);
+      if (list != null) dayData.add(list);
       startDate = startDate!.subtract(Duration(days: 1));
     }
     return dayData;

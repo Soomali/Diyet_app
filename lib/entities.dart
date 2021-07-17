@@ -165,5 +165,9 @@ class MenuList extends _MapHolder<Menu> {
         orElse: () => Menu.empty)];
   }
 
+  Menu getAt(int index) {
+    return map.keys.elementAt(index);
+  }
+
   Map<Menu, int> get map => _map;
 }

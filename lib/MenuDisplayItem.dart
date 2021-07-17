@@ -12,18 +12,32 @@ import 'Basket.dart';
 const TextStyle _menuItemStyle = TextStyle(color: Colors.blue, fontSize: 16);
 
 class MenuPage extends StatelessWidget {
-  const MenuPage({Key? key}) : super(key: key);
+  final MenuList? menulist;
+  const MenuPage({Key? key, this.menulist}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: MenuDisplayList(),
+        body: MenuListWidget(
+            menulist: menulist ?? StorageManager().todaysMenuList,
+            child: MenuDisplayList()),
         drawer: CustomDrawer(),
         floatingActionButton: Basket(),
       ),
     );
   }
+}
+
+class MenuListWidget extends InheritedWidget {
+  final MenuList menulist;
+  const MenuListWidget({required Widget child, required this.menulist})
+      : super(child: child);
+  static MenuListWidget of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType(aspect: MenuListWidget)!;
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
 }
 
 class MenuDisplayList extends StatefulWidget {
@@ -103,7 +117,10 @@ class _MenuDisplayListState extends State<MenuDisplayList> {
 
 class MenuDisplayWidget extends StatefulWidget {
   final Menu menu;
-  const MenuDisplayWidget({Key? key, required this.menu}) : super(key: key);
+  final bool canAddSubstract;
+  const MenuDisplayWidget(
+      {Key? key, required this.menu, this.canAddSubstract = true})
+      : super(key: key);
 
   @override
   _MenuDisplayWidgetState createState() => _MenuDisplayWidgetState();
@@ -142,7 +159,7 @@ class _MenuDisplayWidgetState extends State<MenuDisplayWidget> {
         ),
       ));
     }
-    if (count > limit) {
+    if (count > limit + 1) {
       widgets.add(GestureDetector(
         onTap: () {
           setState(() {
@@ -167,6 +184,7 @@ class _MenuDisplayWidgetState extends State<MenuDisplayWidget> {
   }
 
   bool shown = true;
+
   @override
   Widget build(BuildContext context) {
     return !shown
@@ -184,25 +202,60 @@ class _MenuDisplayWidgetState extends State<MenuDisplayWidget> {
                     children: _widgets,
                   ),
                 ),
-                Positioned(
-                    top: -2,
-                    right: 10,
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            shown = false;
-                          });
-                          StorageManager().deleteMenuFromDB(widget.menu);
-                        },
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.blue,
-                          size: 35,
-                        ))),
-                AddSubstractMenu(menu: widget.menu),
+                if (widget.canAddSubstract)
+                  Positioned(
+                      top: -2,
+                      right: 10,
+                      child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              shown = false;
+                            });
+                            StorageManager().deleteMenuFromDB(widget.menu);
+                          },
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.blue,
+                            size: 35,
+                          ))),
+                widget.canAddSubstract
+                    ? AddSubstractMenu(menu: widget.menu)
+                    : MenuCountWidget(menu: widget.menu),
               ],
             ),
           );
+  }
+}
+
+class MenuCountWidget extends StatelessWidget {
+  final Menu menu;
+  const MenuCountWidget({Key? key, required this.menu}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var pos = MediaQuery.of(context).size.width * 0.4;
+    return Positioned(
+      right: pos,
+      left: pos,
+      bottom: -18,
+      child: Container(
+        alignment: Alignment.bottomCenter,
+        height: 60,
+        width: 10,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(color: Colors.blue),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Align(
+          alignment: Alignment.center,
+          child: Text(
+            MenuListWidget.of(context).menulist[menu].toString() + ' Adet',
+            style: TextStyle(color: Colors.blue, fontSize: 20),
+          ),
+        ),
+      ),
+    );
   }
 }
 

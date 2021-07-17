@@ -6,6 +6,7 @@ import 'CustomDrawer.dart';
 import 'Searchbar.dart';
 import 'entities.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'DaysMenuShow.dart';
 
 double getPercent(num whole, num part) {
   return part * 100 / whole;
@@ -239,7 +240,8 @@ class MenusShowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => print(menulist),
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => DaysMenuShow(menulist: menulist))),
       child: Container(
         padding: EdgeInsets.only(top: 15),
         width: MediaQuery.of(context).size.width * 0.3,

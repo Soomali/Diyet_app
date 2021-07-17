@@ -95,6 +95,7 @@ class StorageManagerListener {
 class StorageManager {
   DateTime today = DateTime.now();
   MenuList _todaysMenus = MenuList.empty;
+
   List<StorageManagerListener> listeners = [];
   Menu current = Menu.empty;
   Database? _db;
@@ -123,7 +124,7 @@ class StorageManager {
   }
 
   double get todaysCalories => _todaysMenus.sumCalories;
-
+  MenuList get todaysMenuList => _todaysMenus;
   int? getCountOnTodays(Menu menu) {
     return _todaysMenus[menu];
   }

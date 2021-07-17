@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:diyet_app/storageManager.dart';
 import 'package:flutter/material.dart';
 import 'CustomDrawer.dart';
@@ -7,6 +9,24 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 double getPercent(num whole, num part) {
   return part * 100 / whole;
+}
+
+const Map<int, String> _monthMap = {
+  1: 'Ocak',
+  2: 'Şubat',
+  3: 'Mart',
+  4: 'Nisan',
+  5: 'Mayıs',
+  6: 'Haziran',
+  7: 'Temmuz',
+  8: 'Ağustos',
+  9: 'Eylül',
+  10: 'Ekim',
+  11: 'Kasım',
+  12: 'Aralık',
+};
+String _toUserFriendlyString(DateTime date) {
+  return '${date.day.toString()} ${_monthMap[date.month]!} ${date.year}';
 }
 
 class CalorieTrackingPage extends StatelessWidget {
@@ -83,8 +103,16 @@ class TodaysCalories extends StatelessWidget {
                 MenuList dayList = snapshot.data as MenuList;
                 var indicator =
                     _getProgressIndicator(dayList.sumCalories, calorieNeed);
-                return CalorieProgress(
-                    indicator: indicator, sumCalories: dayList.sumCalories);
+                return Row(
+                  children: [
+                    Expanded(
+                      child: CalorieProgress(
+                          indicator: indicator,
+                          sumCalories: dayList.sumCalories),
+                    ),
+                    MenusShowWidget(menulist: dayList)
+                  ],
+                );
               }
               return CalorieProgress(
                   indicator: _getProgressIndicator(0, 2500), sumCalories: 0);
@@ -177,16 +205,78 @@ class _ExpandableDayListState extends State<ExpandableDayList> {
             ? TodaysCalories()
             : ExpansionTile(
                 title: Text(
-                  menulist.date.toString(),
+                  _toUserFriendlyString(menulist.date),
                   style: TextStyle(color: Colors.blue),
                 ),
                 children: [
-                  CalorieProgress(
-                      indicator: _getProgressIndicator(menulist.sumCalories,
-                          PreferencesManager().userCalorieNeed),
-                      sumCalories: menulist.sumCalories)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CalorieProgress(
+                            indicator: _getProgressIndicator(
+                                menulist.sumCalories,
+                                PreferencesManager().userCalorieNeed),
+                            sumCalories: menulist.sumCalories),
+                      ),
+                      MenusShowWidget(
+                        menulist: menulist,
+                      )
+                    ],
+                  )
                 ],
               ),
+      ),
+    );
+  }
+}
+
+class MenusShowWidget extends StatelessWidget {
+  final MenuList menulist;
+  MenusShowWidget({Key? key, required this.menulist}) : super(key: key);
+
+  final TextStyle _menusStyle = TextStyle(color: Colors.blue);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => print(menulist),
+      child: Container(
+        padding: EdgeInsets.only(top: 15),
+        width: MediaQuery.of(context).size.width * 0.3,
+        height: MediaQuery.of(context).size.height * 0.3,
+        child: Align(
+          alignment: Alignment.center,
+          child: Column(
+            children: <Widget>[
+                  Expanded(
+                    child: Text(''),
+                  )
+                ] +
+                List.generate(
+                    menulist.map.keys.length > 6 ? 6 : menulist.map.keys.length,
+                    (index) {
+                  if (index == 6 && menulist.map.keys.length > 6) {
+                    return Text(
+                      '...',
+                      style: _menusStyle,
+                    );
+                  }
+                  var menu = menulist.map.keys.elementAt(index);
+                  var name = menu.name;
+                  if (menu.name.length > 10)
+                    name = menu.name.substring(0, 7) + '...';
+                  return Text(
+                    '$name  ${menulist[menu]}',
+                    style: _menusStyle,
+                  );
+                }) +
+                <Widget>[
+                  Expanded(
+                    child: Text(''),
+                  )
+                ],
+          ),
+        ),
       ),
     );
   }

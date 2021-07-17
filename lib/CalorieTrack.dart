@@ -34,12 +34,14 @@ CircularProgressIndicator _getProgressIndicator(
     if (calorieNeed * 1.2 < sumCalories) {
       return CircularProgressIndicator(
         value: val,
+        strokeWidth: 16,
         valueColor: AlwaysStoppedAnimation(Colors.red),
         backgroundColor: Colors.blue,
       );
     }
     return CircularProgressIndicator(
       value: val,
+      strokeWidth: 16,
       valueColor: AlwaysStoppedAnimation(Colors.white),
       backgroundColor: Colors.blue,
     );
@@ -47,7 +49,7 @@ CircularProgressIndicator _getProgressIndicator(
     color = Colors.red;
   }
   return CircularProgressIndicator(
-    strokeWidth: 2,
+    strokeWidth: 16,
     value: getPercent(calorieNeed, sumCalories) / 100,
     valueColor: AlwaysStoppedAnimation(color),
     backgroundColor: Colors.blueGrey,
@@ -81,69 +83,47 @@ class TodaysCalories extends StatelessWidget {
                 MenuList dayList = snapshot.data as MenuList;
                 var indicator =
                     _getProgressIndicator(dayList.sumCalories, calorieNeed);
-                return Container(
-                  width: 300,
-                  height: 300,
-                  margin: EdgeInsets.only(top: 20),
-                  child: FittedBox(
-                    child: Stack(
-                      children: [
-                        indicator,
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical:
-                                  MediaQuery.of(context).size.height * 0.0158,
-                              horizontal: MediaQuery.of(context).size.width *
-                                  (0.018 +
-                                      0.005 *
-                                          (dayList.sumCalories
-                                                  .toStringAsFixed(1)
-                                                  .length -
-                                              1))),
-                          child: Text(
-                            dayList.sumCalories.toString(),
-                            style: TextStyle(color: Colors.blue, fontSize: 8),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return CalorieProgress(
+                    indicator: indicator, sumCalories: dayList.sumCalories);
               }
-              return Container(
-                width: 300,
-                height: 300,
-                margin: EdgeInsets.only(top: 20),
-                child: FittedBox(
-                  child: Stack(
-                    children: [
-                      CircularProgressIndicator(
-                        value: 0,
-                        backgroundColor: Colors.grey,
-                        strokeWidth: 2,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            vertical:
-                                MediaQuery.of(context).size.height * 0.0158,
-                            horizontal:
-                                MediaQuery.of(context).size.width * 0.028),
-                        child: Text(
-                          '0.0',
-                          style: TextStyle(color: Colors.blue, fontSize: 8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return CalorieProgress(
+                  indicator: _getProgressIndicator(0, 2500), sumCalories: 0);
           }
         });
-    // return Column(
-    //   children: [
-    //     CircularProgressIndicator(value: StorageManager().,),
-    //   ],
-    // );
+  }
+}
+
+class CalorieProgress extends StatelessWidget {
+  const CalorieProgress({
+    Key? key,
+    required this.indicator,
+    required this.sumCalories,
+  }) : super(key: key);
+
+  final CircularProgressIndicator indicator;
+  final double sumCalories;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 250.0,
+      child: Stack(
+        children: <Widget>[
+          Center(
+            child: Container(
+              width: 200,
+              height: 200,
+              child: indicator,
+            ),
+          ),
+          Center(
+              child: Text(
+            sumCalories.toStringAsFixed(1),
+            style: TextStyle(color: Colors.blue, fontSize: 48),
+          )),
+        ],
+      ),
+    );
   }
 }
 
@@ -201,35 +181,10 @@ class _ExpandableDayListState extends State<ExpandableDayList> {
                   style: TextStyle(color: Colors.blue),
                 ),
                 children: [
-                  Container(
-                    width: 300,
-                    height: 300,
-                    margin: EdgeInsets.only(top: 20),
-                    child: FittedBox(
-                      child: Stack(
-                        children: [
-                          _getProgressIndicator(menulist.sumCalories,
-                              PreferencesManager().userCalorieNeed),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical:
-                                    MediaQuery.of(context).size.height * 0.0158,
-                                horizontal: MediaQuery.of(context).size.width *
-                                    (0.018 +
-                                        0.005 *
-                                            (menulist.sumCalories
-                                                    .toStringAsFixed(1)
-                                                    .length -
-                                                1))),
-                            child: Text(
-                              menulist.sumCalories.toString(),
-                              style: TextStyle(color: Colors.blue, fontSize: 8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
+                  CalorieProgress(
+                      indicator: _getProgressIndicator(menulist.sumCalories,
+                          PreferencesManager().userCalorieNeed),
+                      sumCalories: menulist.sumCalories)
                 ],
               ),
       ),

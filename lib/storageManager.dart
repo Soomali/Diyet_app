@@ -7,6 +7,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 const int VERSION = 1;
 const Map<int, MapEntry<String, List<Object?>?>> versionScripts = {};
 
+Future<void> _testDatabaseDayEntry() async {
+  List<Menu> menus = await StorageManager().getMenus();
+  DateTime start = DateTime.now().subtract(Duration(days: 2));
+
+  for (int i = 0; i < 8; i++) {
+    var added = MenuList(
+        menus:
+            Map.fromIterables(menus, List.generate(menus.length, (index) => i)),
+        date: start);
+
+    var batch = StorageManager()._db!.batch();
+    var dateString = StorageManager().converToDateString(start);
+    for (MapEntry<Menu, int> menuEntry in added.map.entries) {
+      batch.rawInsert(
+          'INSERT INTO DayEntry(Date,quantity,MenuID) VALUES(?,?,?)',
+          [dateString, menuEntry.value, menuEntry.key.id]);
+    }
+    await batch.commit();
+    start = start.subtract(Duration(days: 1));
+  }
+  print('[testDB] OK!');
+}
+
 class PreferencesManager {
   Map<String, dynamic> happenings = {};
   final String _calorieNeed = 'user_calorieNeed';
@@ -150,6 +173,7 @@ class StorageManager {
       await batch.commit();
     });
     await printTables();
+    // await _testDatabaseDayEntry();
     return true;
   }
 
@@ -276,8 +300,10 @@ class StorageManager {
       var id = map['MenuID'];
       menusMap[id] = map['quantity'];
     }
-    var menusQuery = await _db!
-        .rawQuery('SELECT * FROM Menu WHERE id IN (?)', menusMap.keys.toList());
+    print('?' * 3);
+    var menusQuery = await _db!.rawQuery(
+        'SELECT * FROM Menu WHERE id IN (${"?," * (menusMap.keys.length - 1)}?)',
+        menusMap.keys.toList());
     List<Menu> menus = await this.createMenus(menusQuery);
 
     return MenuList(

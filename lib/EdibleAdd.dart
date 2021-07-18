@@ -1,7 +1,10 @@
 import 'dart:ui';
 
 import 'package:diyet_app/CustomDrawer.dart';
+import 'package:diyet_app/EdibleDisplayItem.dart';
+import 'package:diyet_app/FuturePage.dart';
 import 'package:diyet_app/Searchbar.dart';
+import 'package:diyet_app/storageManager.dart';
 import 'package:flutter/material.dart';
 import 'entities.dart';
 
@@ -122,7 +125,8 @@ class _EdiblePorpertyHolderWidgetState
         });
         error = true;
       } else {
-        holder.options.add(Option(j.first.text, double.parse(j.last.text), -1));
+        holder.options.add(Option(
+            j.first.text, double.parse(j.last.text.replaceAll(',', '.')), -1));
       }
     }
     if (!error) {
@@ -167,7 +171,13 @@ class AddEdibleButton extends StatelessWidget {
           iconSize: 80,
           onPressed: () {
             var edible = ediblePorpertyKey.currentState!.getEdible();
-            print(edible);
+            if (edible != null) {
+              Navigator.of(context)
+                  .push(FuturePopUp(
+                      future: StorageManager().insertEdible(edible)))
+                  .then((value) => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => EdiblePage())));
+            }
           },
           icon: Icon(
             Icons.add_circle_outline_outlined,

@@ -30,6 +30,7 @@ class _MapHolder<T> {
 }
 
 class Edible {
+  static Edible get empty => Edible('', -1, OptionHolder.empty);
   late int id;
   late String name;
   OptionHolder optionHolder;
@@ -54,6 +55,7 @@ class Edible {
 }
 
 class OptionHolder {
+  static OptionHolder get empty => OptionHolder([]);
   late List<Option> options;
   int activeOption = 0;
   OptionHolder(

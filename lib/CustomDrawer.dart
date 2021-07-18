@@ -1,4 +1,5 @@
 import 'package:diyet_app/CalorieINeed.dart';
+import 'package:diyet_app/EdibleAdd.dart';
 import 'package:diyet_app/MenuDisplayItem.dart';
 import 'EdibleDisplayItem.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,13 @@ class CustomDrawer extends StatelessWidget {
                 onTap: () => toPage(CalorieNeedCalculatePage(), context),
                 text: 'Günlük Kalori İhtiyacı Hesapla',
                 icon: Icons.calculate_outlined),
+          ),
+          DrawerItem(
+            child: CustomListTile(
+              onTap: () => toPage(EdibleAdd(), context),
+              text: 'Yiyecek Ekle',
+              icon: Icons.how_to_vote_outlined,
+            ),
           )
         ],
       ),

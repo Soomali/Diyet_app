@@ -8,20 +8,22 @@ import 'entities.dart';
 const TextStyle _inputStyle = TextStyle(color: Colors.blue, fontSize: 16);
 
 class EdibleAdd extends StatelessWidget {
-  const EdibleAdd({Key? key}) : super(key: key);
-
+  EdibleAdd({Key? key}) : super(key: key);
+  final GlobalKey<_EdiblePorpertyHolderWidgetState> _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: EdibleWidget(
-      edible: Edible.empty,
-      child: Scaffold(
-        body: Column(children: [
-          AppBarWithNoSearch(),
-          Expanded(child: EdiblePorpertyHolderWidget())
-        ]),
-        drawer: CustomDrawer(),
-        floatingActionButton: AddEdibleButton(),
+        child: Scaffold(
+      body: Column(children: [
+        AppBarWithNoSearch(),
+        Expanded(
+            child: EdiblePorpertyHolderWidget(
+          key: _key,
+        ))
+      ]),
+      drawer: CustomDrawer(),
+      floatingActionButton: AddEdibleButton(
+        ediblePorpertyKey: _key,
       ),
     ));
   }
@@ -66,24 +68,19 @@ class _EdiblePorpertyHolderWidgetState
   final List<Widget> widgets = [];
   final TextEditingController nameController = TextEditingController();
   Widget _createOptionWidget() {
-    var opt = Padding(
-        padding: EdgeInsets.only(top: 15),
-        child: OptionGetter(
-          nameController: optionTextEditingControllers.last.first,
-          calorieController: optionTextEditingControllers.last.last,
-          onDelete:
-              optionTextEditingControllers.length != 1 ? removeOption : null,
-          index: widgets.length,
-        ));
+    var opt = OptionGetter(
+      nameController: optionTextEditingControllers.last.first,
+      calorieController: optionTextEditingControllers.last.last,
+      onDelete: optionTextEditingControllers.length != 1 ? removeOption : null,
+    );
     optionTextEditingControllers
         .add([TextEditingController(), TextEditingController()]);
     return opt;
   }
 
-  void removeOption(int index) {
-    optionTextEditingControllers.length == maxOptionCount
-        ? optionTextEditingControllers.removeAt(index - 1)
-        : optionTextEditingControllers.removeAt(index - 2);
+  void removeOption(Widget x) {
+    var index = widgets.indexOf(x);
+    optionTextEditingControllers.removeAt(index - 1);
     setState(() {
       widgets.removeAt(index);
     });
@@ -94,6 +91,42 @@ class _EdiblePorpertyHolderWidgetState
       setState(() {
         widgets.add(_createOptionWidget());
       });
+    }
+  }
+
+  Edible? getEdible() {
+    var name = nameController.text;
+    if (name.isEmpty) {
+      setState(() {
+        widgets.first = EdibleNameGetter(
+          controller: nameController,
+          hasError: true,
+        );
+      });
+
+      return null;
+    }
+    var holder = OptionHolder.empty;
+    bool error = false;
+
+    for (int i = 0; i < optionTextEditingControllers.length - 1; i++) {
+      var j = optionTextEditingControllers[i];
+      if (j.first.text.isEmpty || j.last.text.isEmpty) {
+        setState(() {
+          widgets[i + 1] = OptionGetter(
+            nameController: j.first,
+            calorieController: j.last,
+            errorState: true,
+            onDelete: i > 0 ? removeOption : null,
+          );
+        });
+        error = true;
+      } else {
+        holder.options.add(Option(j.first.text, double.parse(j.last.text), -1));
+      }
+    }
+    if (!error) {
+      return Edible(name, -1, holder);
     }
   }
 
@@ -122,9 +155,9 @@ class _EdiblePorpertyHolderWidgetState
 }
 
 class AddEdibleButton extends StatelessWidget {
-  const AddEdibleButton({
-    Key? key,
-  }) : super(key: key);
+  final GlobalKey<_EdiblePorpertyHolderWidgetState> ediblePorpertyKey;
+  const AddEdibleButton({Key? key, required this.ediblePorpertyKey})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +166,8 @@ class AddEdibleButton extends StatelessWidget {
       child: IconButton(
           iconSize: 80,
           onPressed: () {
-            print(EdibleWidget.of(context).edible);
+            var edible = ediblePorpertyKey.currentState!.getEdible();
+            print(edible);
           },
           icon: Icon(
             Icons.add_circle_outline_outlined,
@@ -144,97 +178,99 @@ class AddEdibleButton extends StatelessWidget {
   }
 }
 
-class EdibleWidget extends InheritedWidget {
-  final Edible edible;
-  const EdibleWidget({required Widget child, required this.edible})
-      : super(child: child);
-  static EdibleWidget of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType(aspect: EdibleWidget)!;
-  @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
-}
-
 class OptionGetter extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController calorieController;
-  final void Function(int)? onDelete;
-  final int index;
+  final void Function(Widget)? onDelete;
+  final bool errorState;
   const OptionGetter(
       {Key? key,
       required this.nameController,
       required this.calorieController,
-      required this.index,
-      this.onDelete})
+      this.onDelete,
+      this.errorState = false})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          decoration: BoxDecoration(
-              color: Colors.black,
-              border: Border.all(color: Colors.blue, width: 1.6),
-              borderRadius: BorderRadius.circular(8)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  maxLength: 16,
-                  maxLines: 1,
-                  controller: nameController,
-                  decoration: InputDecoration(
-                      hintText: 'Seçenek ismi',
-                      hintStyle: TextStyle(color: Colors.lightBlue[300]),
-                      prefixIcon: Icon(
-                        Icons.settings_input_component,
-                        color: Colors.blue,
-                      )),
-                  style: _inputStyle,
+    return Padding(
+      padding: const EdgeInsets.only(top: 15.0),
+      child: Stack(
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+                color: Colors.black,
+                border: Border.all(color: Colors.blue, width: 1.6),
+                borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextField(
+                    maxLength: 16,
+                    maxLines: 1,
+                    controller: nameController,
+                    decoration: InputDecoration(
+                        errorText: errorState
+                            ? 'Hata! boş bırakılamaz!,silmeyi deneyin.'
+                            : null,
+                        hintText: 'Seçenek ismi',
+                        hintStyle: TextStyle(color: Colors.lightBlue[300]),
+                        prefixIcon: Icon(
+                          Icons.settings_input_component,
+                          color: Colors.blue,
+                        )),
+                    style: _inputStyle,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: TextField(
-                  maxLength: 6,
-                  maxLines: 1,
-                  controller: calorieController,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                      hintText: 'Kalori',
-                      hintStyle: TextStyle(color: Colors.lightBlue[300]),
-                      prefixIcon: Icon(
-                        Icons.calculate_outlined,
-                        color: Colors.blue,
-                      )),
-                  style: _inputStyle,
+                Expanded(
+                  child: TextField(
+                    maxLength: 6,
+                    maxLines: 1,
+                    controller: calorieController,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                        errorText: errorState
+                            ? 'Hata! boş bırakılamaz!,silmeyi deneyin.'
+                            : null,
+                        hintText: 'Kalori',
+                        hintStyle: TextStyle(color: Colors.lightBlue[300]),
+                        prefixIcon: Icon(
+                          Icons.calculate_outlined,
+                          color: Colors.blue,
+                        )),
+                    style: _inputStyle,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        if (onDelete != null)
-          Positioned(
-              right: -3,
-              top: -10,
-              child: IconButton(
-                iconSize: 35,
-                icon: Icon(
-                  Icons.remove_circle_rounded,
-                  color: Colors.blue,
-                ),
-                onPressed: () => this.onDelete!(index),
-              )),
-      ],
+          if (onDelete != null)
+            Positioned(
+                right: -3,
+                top: -10,
+                child: IconButton(
+                  iconSize: 35,
+                  icon: Icon(
+                    Icons.remove_circle_rounded,
+                    color: Colors.blue,
+                  ),
+                  onPressed: () => this.onDelete!(this),
+                )),
+        ],
+      ),
     );
   }
 }
 
 class EdibleNameGetter extends StatelessWidget {
   final TextEditingController controller;
-  const EdibleNameGetter({Key? key, required this.controller})
+  final bool hasError;
+  const EdibleNameGetter(
+      {Key? key, required this.controller, this.hasError = false})
       : super(key: key);
 
   @override
@@ -250,6 +286,7 @@ class EdibleNameGetter extends StatelessWidget {
         maxLength: 32,
         maxLines: 1,
         decoration: InputDecoration(
+            errorText: hasError ? 'Bu alan boş bırakılamaz' : null,
             hintText: 'Yiyeceğin ismi',
             hintStyle: TextStyle(color: Colors.lightBlue[300]),
             prefixIcon: Icon(

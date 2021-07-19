@@ -50,6 +50,7 @@ class _EdibleItemListState extends State<EdibleItemList> {
   static const int _pageSize = 30;
   final manager = StorageManager();
   int lastEdibleId = 0;
+  bool isLastPage = false;
   final PagingController<int, Edible> controller =
       PagingController(firstPageKey: 0);
   String? _search;
@@ -65,7 +66,7 @@ class _EdibleItemListState extends State<EdibleItemList> {
     try {
       final newItems = await manager.getEdibles(
           lastEdibleID: lastEdibleId, searchParam: _search);
-      final isLastPage = newItems.length < _pageSize;
+      isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         controller.appendLastPage(newItems);
       } else {
@@ -95,6 +96,9 @@ class _EdibleItemListState extends State<EdibleItemList> {
             child: PagedListView<int, Edible>(
               pagingController: controller,
               builderDelegate: PagedChildBuilderDelegate<Edible>(
+                noMoreItemsIndicatorBuilder: (context) => Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.height * 0.12)),
                 itemBuilder: (context, item, index) => EdibleItemDisplay(
                   edible: item,
                 ),

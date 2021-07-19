@@ -78,47 +78,42 @@ CircularProgressIndicator _getProgressIndicator(
 }
 
 class TodaysCalories extends StatelessWidget {
-  const TodaysCalories({Key? key}) : super(key: key);
+  final MenuList? list;
+  const TodaysCalories({Key? key, this.list}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: StorageManager().getDayMenus(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-              return Text('Bağlantı yok');
-            case ConnectionState.waiting:
-              return Text('Bağlanılıyor..');
-            case ConnectionState.active:
-              return CircularProgressIndicator();
-            case ConnectionState.done:
-              if (snapshot.hasError) {
-                return Text(
-                  'Hata oluştu,${snapshot.error}',
-                  style: TextStyle(color: Colors.red),
-                );
-              }
-              if (snapshot.hasData) {
-                var calorieNeed = PreferencesManager().userCalorieNeed;
-                MenuList dayList = snapshot.data as MenuList;
-                var indicator =
-                    _getProgressIndicator(dayList.sumCalories, calorieNeed);
-                return Row(
-                  children: [
-                    Expanded(
-                      child: CalorieProgress(
-                          indicator: indicator,
-                          sumCalories: dayList.sumCalories),
-                    ),
-                    MenusShowWidget(menulist: dayList)
-                  ],
-                );
-              }
-              return CalorieProgress(
-                  indicator: _getProgressIndicator(0, 2500), sumCalories: 0);
-          }
-        });
+    if (list != null) {
+      var calorieNeed = PreferencesManager().userCalorieNeed;
+      var indicator = _getProgressIndicator(list!.sumCalories, calorieNeed);
+      return Row(
+        children: [
+          Expanded(
+            child: CalorieProgress(
+                indicator: indicator, sumCalories: list!.sumCalories),
+          ),
+          MenusShowWidget(menulist: list!)
+        ],
+      );
+    }
+    return Align(
+      alignment: Alignment.topRight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: CalorieProgress(
+                indicator: _getProgressIndicator(0, 2500), sumCalories: 0),
+          ),
+          FittedBox(
+            child: Text(
+              'Henüz bir şey yememişsiniz.',
+              style: TextStyle(color: Colors.blue),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -202,30 +197,35 @@ class _ExpandableDayListState extends State<ExpandableDayList> {
     return PagedListView(
       pagingController: this.controller,
       builderDelegate: PagedChildBuilderDelegate<MenuList>(
-        itemBuilder: (context, menulist, index) => index == 0
-            ? TodaysCalories()
-            : ExpansionTile(
-                title: Text(
-                  _toUserFriendlyString(menulist.date),
-                  style: TextStyle(color: Colors.blue),
-                ),
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CalorieProgress(
-                            indicator: _getProgressIndicator(
-                                menulist.sumCalories,
-                                PreferencesManager().userCalorieNeed),
-                            sumCalories: menulist.sumCalories),
-                      ),
-                      MenusShowWidget(
-                        menulist: menulist,
-                      )
-                    ],
-                  )
-                ],
-              ),
+        noItemsFoundIndicatorBuilder: (context) => TodaysCalories(),
+        itemBuilder: (context, menulist, index) {
+          return index == 0
+              ? TodaysCalories(
+                  list: menulist,
+                )
+              : ExpansionTile(
+                  title: Text(
+                    _toUserFriendlyString(menulist.date),
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CalorieProgress(
+                              indicator: _getProgressIndicator(
+                                  menulist.sumCalories,
+                                  PreferencesManager().userCalorieNeed),
+                              sumCalories: menulist.sumCalories),
+                        ),
+                        MenusShowWidget(
+                          menulist: menulist,
+                        )
+                      ],
+                    )
+                  ],
+                );
+        },
       ),
     );
   }

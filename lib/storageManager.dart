@@ -150,14 +150,14 @@ class StorageManager {
 // Check if the database exists
     var exists = await databaseExists(path);
 
-    if (!exists) {
-      // Copy from asset
-      ByteData data = await rootBundle.load("assets/Diyet.db");
-      List<int> bytes =
-          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    // Copy from asset
+    ByteData data = await rootBundle.load("assets/Diyet.db");
+    List<int> bytes =
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
-      // Write and flush the bytes written
-      await File(path).writeAsBytes(bytes, flush: true);
+    // Write and flush the bytes written
+    await File(path).writeAsBytes(bytes, flush: true);
+    if (!exists) {
     } else {
       print("Opening existing database");
     }
@@ -173,7 +173,7 @@ class StorageManager {
       }
       await batch.commit();
     });
-    await printTables();
+    // await printTables();
     // await _testDatabaseDayEntry();
     return true;
   }
@@ -315,7 +315,7 @@ class StorageManager {
 
   Future<List<MenuList>> getHistoricDayMenus(
       {int limit = 30, DateTime? startDate}) async {
-    startDate ??= DateTime.now().subtract(Duration(days: 1));
+    startDate ??= DateTime.now();
     List<MenuList> dayData = [];
     for (int i = 0; i < limit; i++) {
       MenuList? list = await getDayMenus(date: startDate);

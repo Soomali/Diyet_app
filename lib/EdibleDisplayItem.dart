@@ -244,7 +244,7 @@ class OptionDisplay extends StatelessWidget {
 class AddQuantityDiscard extends StatefulWidget {
   final void Function() onAddPressed;
   final void Function() onDiscardPressed;
-  int quantity;
+  final int quantity;
   AddQuantityDiscard(
       {Key? key,
       required this.onAddPressed,
@@ -283,6 +283,9 @@ class _AddQuantityDiscardState extends State<AddQuantityDiscard> {
             onTapUp: (TapUpDetails details) {
               t!.cancel();
             },
+            onTapCancel: () {
+              if (t != null) t!.cancel();
+            },
             onTap: widget.onDiscardPressed,
             child: Icon(Icons.remove_circle_outline,
                 color: Colors.blue, size: 32)),
@@ -298,6 +301,9 @@ class _AddQuantityDiscardState extends State<AddQuantityDiscard> {
             },
             onTapUp: (TapUpDetails details) {
               t!.cancel();
+            },
+            onTapCancel: () {
+              if (t != null) t!.cancel();
             },
             onTap: widget.onAddPressed,
             child: Icon(

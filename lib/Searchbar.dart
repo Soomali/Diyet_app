@@ -49,6 +49,14 @@ class _SearchAreaState extends State<SearchArea> {
             child: Padding(
                 padding: EdgeInsets.only(left: 15),
                 child: TextField(
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    focusedBorder: InputBorder.none,
+                    suffixIcon: Icon(
+                      Icons.search,
+                      color: Colors.black,
+                    ),
+                  ),
                   controller: widget.controller,
                   onChanged: widget.onChanged,
                 )),

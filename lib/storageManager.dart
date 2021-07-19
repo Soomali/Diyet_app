@@ -149,15 +149,14 @@ class StorageManager {
     var path = databasesPath + "/Diyet.db";
 // Check if the database exists
     var exists = await databaseExists(path);
-
-    // Copy from asset
-    ByteData data = await rootBundle.load("assets/Diyet.db");
-    List<int> bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-
-    // Write and flush the bytes written
-    await File(path).writeAsBytes(bytes, flush: true);
     if (!exists) {
+      // Copy from asset
+      ByteData data = await rootBundle.load("assets/Diyet.db");
+      List<int> bytes =
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+
+      // Write and flush the bytes written
+      await File(path).writeAsBytes(bytes, flush: true);
     } else {
       print("Opening existing database");
     }

@@ -237,7 +237,8 @@ class OptionDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EdibleItemText(data: '${option.name}/${option.calorie} kcal');
+    return EdibleItemText(
+        data: '${option.name}/${option.calorie.toStringAsFixed(2)} kcal');
   }
 }
 
